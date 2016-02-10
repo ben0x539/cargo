@@ -21,6 +21,7 @@ pub enum VersionControl { Git, Hg, NoVcs }
 pub struct NewOptions<'a> {
     pub version_control: Option<VersionControl>,
     pub bin: bool,
+    pub lib: bool,
     pub path: &'a str,
     pub name: Option<&'a str>,
 }
@@ -208,6 +209,9 @@ fn plan_new_source_file(bin: bool, project_name: String) -> SourceFileInformatio
 }
 
 pub fn new(opts: NewOptions, config: &Config) -> CargoResult<()> {
+    if opts.lib && opts.bin {
+        bail!("cannot specify both --bin and --lib");
+    }
     let path = config.cwd().join(opts.path);
     if fs::metadata(&path).is_ok() {
         bail!("destination `{}` already exists",
@@ -231,6 +235,9 @@ pub fn new(opts: NewOptions, config: &Config) -> CargoResult<()> {
 }
 
 pub fn init(opts: NewOptions, config: &Config) -> CargoResult<()> {
+    if opts.lib && opts.bin {
+        bail!("cannot specify both --bin and --lib");
+    }
     let path = config.cwd().join(opts.path);
     
     let cargotoml_path = path.join("Cargo.toml");
